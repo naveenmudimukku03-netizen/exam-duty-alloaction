@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVIT – Exam Duty Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a1f5e; --red: #d32f2f; --red-light: #ef5350; --gold: #f5c842;
+            --white: #ffffff; --offwhite: #f8f7f4; --grey: #e8e6e1;
+            --text-dark: #1a1a2e; --text-mid: #4a4a6a; --text-light: #8888aa;
+            --success: #2e7d32; --warning: #ed6c02; --info: #0288d1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--offwhite); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: flex; }
+
+        /* ─── LOGIN ─── */
+        #loginPage { flex-direction: row; }
+        .login-left { width: 70%; background: linear-gradient(135deg, #0a0e3a 0%, #1a1f5e 40%, #1e1a7a 70%, #0a0e3a 100%); position: relative; display: flex; flex-direction: column; padding: 44px 56px; min-height: 100vh; overflow: hidden; }
+        .bg-logo-watermark { position: absolute; right: -60px; top: 50%; transform: translateY(-50%); width: 520px; height: 520px; opacity: 0.08; z-index: 0; pointer-events: none; }
+        .bg-logo-watermark img { width: 100%; height: 100%; object-fit: contain; }
+        .bg-logo-watermark-2 { position: absolute; left: -80px; bottom: -80px; width: 320px; height: 320px; opacity: 0.05; z-index: 0; pointer-events: none; }
+        .bg-logo-watermark-2 img { width: 100%; height: 100%; object-fit: contain; }
+        .login-left::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 25% 20%, rgba(211,47,47,0.2) 0%, transparent 55%); z-index: 0; }
+        .deco-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,0.06); pointer-events: none; z-index: 0; }
+        .deco-ring-1 { width: 700px; height: 700px; top: -250px; right: -200px; animation: ringRotate 60s linear infinite; }
+        .deco-ring-2 { width: 450px; height: 450px; bottom: -100px; left: -120px; animation: ringRotate 90s linear infinite reverse; }
+        @keyframes ringRotate { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; z-index: 1; opacity: 0; animation: particleDrift linear infinite; }
+        .p1{width:6px;height:6px;background:rgba(245,200,66,0.55);left:12%;top:80%;animation-duration:14s}
+        .p2{width:4px;height:4px;background:rgba(239,83,80,0.45);left:28%;top:90%;animation-duration:18s}
+        .p3{width:8px;height:8px;background:rgba(255,255,255,0.18);left:55%;top:85%;animation-duration:22s}
+        .p4{width:5px;height:5px;background:rgba(245,200,66,0.35);left:70%;top:92%;animation-duration:16s}
+        .p5{width:3px;height:3px;background:rgba(239,83,80,0.6);left:85%;top:88%;animation-duration:12s}
+        .p6{width:7px;height:7px;background:rgba(255,255,255,0.12);left:42%;top:95%;animation-duration:20s}
+        @keyframes particleDrift { 0%{transform:translateY(0) translateX(0);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-380px) translateX(40px);opacity:0} }
+        .top-bar { display: flex; align-items: center; gap: 18px; position: relative; z-index: 2; margin-bottom: 48px; }
+        .logo-mark { width: 76px; height: 76px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); flex-shrink: 0; }
+        .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+        .institute-name { color: white; }
+        .institute-name .abbr { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; letter-spacing: 4px; color: var(--gold); line-height: 1; }
+        .institute-name .full { font-size: 12.5px; font-weight: 400; color: rgba(255,255,255,0.75); max-width: 280px; margin-top: 3px; }
+        .hero-content { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .system-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(211,47,47,0.18); border: 1px solid rgba(211,47,47,0.45); border-radius: 100px; padding: 6px 16px; margin-bottom: 26px; width: fit-content; }
+        .system-badge .dot { width: 8px; height: 8px; background: var(--red-light); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+        .hero-title { font-family: 'Playfair Display', serif; font-size: 60px; font-weight: 900; color: white; line-height: 1.05; margin-bottom: 18px; }
+        .hero-title .accent { color: var(--gold); display: block; }
+        .hero-sub { font-size: 15.5px; color: rgba(255,255,255,0.6); max-width: 500px; line-height: 1.75; margin-bottom: 40px; }
+        .features-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 36px; }
+        .feature-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 12px; padding: 18px; backdrop-filter: blur(10px); transition: all 0.3s; }
+        .feature-card:hover { background: rgba(255,255,255,0.13); transform: translateY(-2px); }
+        .feature-icon { font-size: 22px; margin-bottom: 9px; display: block; }
+        .feature-card h4 { font-size: 13px; font-weight: 600; color: white; margin-bottom: 5px; }
+        .feature-card p { font-size: 11.5px; color: rgba(255,255,255,0.5); }
+        .stats-row { display: flex; gap: 36px; }
+        .stat-item { border-left: 2px solid var(--red); padding-left: 14px; }
+        .stat-value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: white; line-height: 1; }
+        .stat-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .login-right { width: 30%; background: var(--white); display: flex; flex-direction: column; justify-content: center; padding: 48px 32px; position: relative; box-shadow: -20px 0 60px rgba(0,0,0,0.18); min-height: 100vh; }
+        .login-right::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--navy), var(--red)); }
+        .right-logo-top { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; padding-bottom: 22px; border-bottom: 1px solid var(--grey); }
+        .right-logo-top img { width: 44px; height: 44px; object-fit: contain; }
+        .right-logo-top .rl-text .rl-abbr { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 900; letter-spacing: 2px; color: var(--navy); }
+        .right-logo-top .rl-text .rl-full { font-size: 9.5px; color: var(--text-light); max-width: 140px; }
+        .login-header { margin-bottom: 28px; }
+        .login-header h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+        .login-header p { font-size: 12.5px; color: var(--text-light); }
+        .role-toggle { display: flex; background: var(--grey); border-radius: 8px; padding: 4px; margin-bottom: 24px; gap: 4px; }
+        .role-btn { flex: 1; padding: 9px 10px; border: none; background: transparent; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
+        .role-btn.active { background: var(--navy); color: white; box-shadow: 0 2px 8px rgba(26,31,94,0.3); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mid); margin-bottom: 7px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px 13px; border: 1.5px solid var(--grey); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; background: var(--offwhite); outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--navy); background: white; box-shadow: 0 0 0 3px rgba(26,31,94,0.08); }
+        .login-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--navy), #2a2080); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 6px; }
+        .login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,31,94,0.35); background: linear-gradient(135deg, #2a2080, var(--red)); }
+        .demo-hint { margin-top: 24px; padding: 13px; background: #f0f4ff; border-radius: 8px; border-left: 3px solid var(--navy); }
+        .demo-hint p { font-size: 11px; color: var(--text-mid); line-height: 1.7; }
+        .demo-hint strong { color: var(--navy); }
+        .credit-line-blue { text-align: center; margin-top: auto; padding-top: 20px; font-size: 9px; color: var(--gold); letter-spacing: 0.5px; font-weight: 500; opacity: 0.8; position: relative; z-index: 2; }
+
+        /* ─── DASHBOARDS ─── */
+        #facultyDash, #adminDash { flex-direction: column; background: #eef0f8; }
+        .dash-topbar { background: var(--navy); color: white; height: 62px; display: flex; align-items: center; padding: 0 28px; gap: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.25); position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
+        .topbar-logo { display: flex; align-items: center; gap: 12px; }
+        .topbar-logo-img { width: 40px; height: 40px; background: white; border-radius: 8px; padding: 3px; }
+        .topbar-logo-img img { width: 100%; height: 100%; object-fit: contain; }
+        .topbar-name-block { display: flex; flex-direction: column; }
+        .topbar-abbr { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 900; color: var(--gold); letter-spacing: 2px; line-height: 1; }
+        .topbar-fullname { font-size: 9px; color: rgba(255,255,255,0.5); max-width: 220px; }
+        .topbar-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); margin: 0 8px; }
+        .topbar-system { font-size: 13px; font-weight: 600; }
+        .topbar-sub { font-size: 10px; color: rgba(255,255,255,0.5); }
+        .topbar-spacer { flex: 1; }
+        .topbar-user { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: white; transition: transform 0.3s; cursor: default; }
+        .avatar-faculty { background: linear-gradient(135deg, #2196f3, #1565c0); }
+        .avatar-admin { background: linear-gradient(135deg, var(--red), #b71c1c); }
+        .user-avatar:hover { transform: scale(1.12) rotate(3deg); }
+        .user-info { text-align: right; }
+        .user-name { font-size: 13px; font-weight: 600; }
+        .user-role { font-size: 10px; color: rgba(255,255,255,0.5); }
+        .logout-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; padding: 7px 14px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
+        .logout-btn:hover { background: rgba(211,47,47,0.35); }
+        .change-pwd-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 10px; border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .change-pwd-btn:hover { background: rgba(255,255,255,0.35); }
+        .dash-body { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 62px); }
+        .sidebar { width: 240px; background: var(--white); border-right: 1px solid #dde0f0; padding: 16px 0; overflow-y: auto; flex-shrink: 0; position: relative; }
+        .sidebar-watermark { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; opacity: 0.08; pointer-events: none; z-index: 0; }
+        .sidebar-watermark img { width: 100%; height: 100%; object-fit: contain; }
+        .sidebar-section { margin-bottom: 6px; position: relative; z-index: 1; }
+        .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-light); padding: 8px 20px 5px; }
+        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: var(--text-mid); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 500; border-left: 3px solid transparent; position: relative; z-index: 1; }
+        .sidebar-item:hover { background: #f0f2f8; color: var(--navy); }
+        .sidebar-item.active { background: #eef0fa; color: var(--navy); border-left-color: var(--navy); font-weight: 600; }
+        .sidebar-item .icon { font-size: 15px; }
+        .dash-main { flex: 1; overflow-y: auto; padding: 26px; }
+        .view-header { margin-bottom: 24px; }
+        .view-header h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+        .view-header p { font-size: 13px; color: var(--text-light); }
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: white; border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eef0f8; transition: transform 0.28s ease; cursor: default; }
+        .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+        .stat-card .card-icon { font-size: 28px; }
+        .stat-card .card-value { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1; }
+        .stat-card .card-label { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+        .form-card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eef0f8; }
+        .form-card .form-group { margin-bottom: 1.2rem; }
+        .form-card label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-mid); display: block; margin-bottom: 0.4rem; }
+        .form-card input, .form-card select, .form-card textarea { width: 100%; padding: 0.7rem 0.8rem; border: 1.5px solid #e0e3f0; border-radius: 12px; background: #f8f9fe; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; }
+        .form-card input:focus, .form-card select:focus, .form-card textarea:focus { border-color: var(--navy); background: white; box-shadow: 0 0 0 3px rgba(26,31,94,0.08); }
+        .form-card textarea { resize: vertical; min-height: 90px; }
+        .btn-primary { background: var(--navy); color: white; padding: 0.6rem 1.4rem; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; font-size: 13px; }
+        .btn-primary:hover { background: #2a2080; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,31,94,0.3); }
+        .btn-danger { background: var(--red); color: white; padding: 0.4rem 0.9rem; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; font-size: 12px; }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-success { background: var(--success); color: white; padding: 0.4rem 0.9rem; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; font-size: 12px; }
+        .section-card { background: white; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eef0f8; margin-bottom: 1.5rem; overflow: hidden; transition: box-shadow 0.28s, transform 0.28s; }
+        .section-card:hover { box-shadow: 0 8px 28px rgba(26,31,94,0.1); transform: translateY(-2px); }
+        .section-card-header { padding: 1rem 1.5rem; border-bottom: 1px solid #f0f2f8; display: flex; align-items: center; justify-content: space-between; }
+        .section-card-header h3 { font-size: 1rem; font-weight: 600; color: var(--navy); }
+        .table-wrap { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: #f8f9fe; padding: 0.8rem 1rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light); border-bottom: 1px solid #e8eaf2; text-align: left; }
+        .data-table td { padding: 0.8rem 1rem; border-bottom: 1px solid #f0f2f8; font-size: 0.8rem; color: var(--text-dark); vertical-align: middle; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: #f8f9fe; }
+        .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
+        .badge-info { background: #e3f2fd; color: #1565c0; }
+        .badge-warning { background: #fff3e0; color: #e65100; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+        .badge-red { background: #ffebee; color: #c62828; }
+        .badge-purple { background: #f3e5f5; color: #6a1b9a; }
+        .empty-state { text-align: center; padding: 2.5rem; color: var(--text-light); font-size: 0.85rem; }
+        .empty-state .empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
+        .dept-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding: 1rem; }
+        .dept-stat-tile { background: #f8f9fe; border-radius: 18px; padding: 14px; text-align: center; border: 1px solid #eef0f8; }
+        .dept-stat-tile h4 { font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+        .dept-count-faculty { font-size: 1.8rem; font-weight: 800; color: var(--navy); line-height: 1; }
+        .notif { position: fixed; bottom: 20px; right: 20px; color: white; padding: 12px 20px; border-radius: 40px; display: none; z-index: 2000; font-size: 14px; max-width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .notif.show { display: block; animation: fadeInUp 0.3s ease; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .info-banner { background: linear-gradient(135deg, #e3f2fd, #f0f4ff); border: 1px solid #bbdefb; border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; font-size: 0.82rem; color: #1565c0; display: flex; gap: 0.7rem; align-items: flex-start; }
+        .info-banner .info-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .request-card { background: white; border-radius: 20px; padding: 1.6rem; border: 1px solid #eef0f8; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 1rem; }
+        .request-card .rc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+        .request-card .rc-title { font-weight: 700; font-size: 0.95rem; color: var(--navy); }
+        .request-card .rc-meta { font-size: 0.75rem; color: var(--text-light); margin-top: 2px; }
+        .request-card .rc-reason { font-size: 0.82rem; color: var(--text-mid); background: #f8f9fe; border-radius: 10px; padding: 0.7rem; margin: 0.7rem 0; border-left: 3px solid var(--navy); }
+        .rc-actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
+        .free-badge { background: #e8f5e9; color: #2e7d32; padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .scroll-progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--gold), var(--red-light)); z-index: 9999; transition: width 0.1s linear; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: white; padding: 1rem; border-radius: 20px; border: 1px solid #eef0f8; }
+        .cal-day-header { text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--text-light); padding: 0.5rem; }
+        .cal-day { text-align: center; padding: 0.6rem 0; background: #f8f9fe; border-radius: 12px; font-size: 0.8rem; }
+        .cal-day.has-duty { background: #e3f2fd; color: #1565c0; font-weight: 600; }
+
+        /* ─── ALLOCATION LAYOUT (single column — sidebar removed) ─── */
+        .dept-preview-panel { background: linear-gradient(135deg, #eef1ff 0%, #f8f9ff 100%); border: 1.5px solid #c5caf0; border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; }
+        .dept-preview-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-mid); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 6px; }
+        .dept-tag { background: var(--navy); color: white; border-radius: 20px; padding: 2px 10px; font-size: 0.65rem; font-weight: 700; }
+        .dept-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .dept-preview-tile { background: white; border-radius: 10px; padding: 9px 10px; border: 1px solid #e0e3f0; text-align: center; }
+        .dept-preview-tile .dpv { font-family: 'DM Mono', monospace; font-size: 1.3rem; font-weight: 700; color: var(--navy); line-height: 1; }
+        .dept-preview-tile .dpl { font-size: 0.62rem; color: var(--text-light); margin-top: 2px; }
+        .dept-preview-tile.highlight { background: linear-gradient(135deg, var(--navy), #2a2080); border-color: var(--navy); }
+        .dept-preview-tile.highlight .dpv { color: white; }
+        .dept-preview-tile.highlight .dpl { color: rgba(255,255,255,0.7); }
+
+        /* Faculty count input */
+        .faculty-count-section { margin-bottom: 1.2rem; }
+        .faculty-count-section > label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-mid); display: block; margin-bottom: 0.5rem; }
+        .count-input-row { display: flex; align-items: center; gap: 10px; }
+        .count-stepper-btn { width: 40px; height: 44px; border: 1.5px solid #c5caf0; border-radius: 10px; background: #f0f2f8; font-size: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--navy); transition: 0.15s; flex-shrink: 0; font-family: 'DM Sans', sans-serif; }
+        .count-stepper-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+        .count-number-input { flex: 1; padding: 0.7rem 0.8rem; border: 2px solid var(--navy); border-radius: 12px; background: white; font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 700; text-align: center; color: var(--navy); outline: none; }
+        .count-number-input:focus { box-shadow: 0 0 0 3px rgba(26,31,94,0.12); }
+        .count-number-input::-webkit-inner-spin-button, .count-number-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .count-hint-row { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; flex-wrap: wrap; gap: 4px; }
+        .count-hint-avail { color: var(--success); font-weight: 600; }
+        .count-hint-warn { color: var(--red); font-weight: 600; display: none; }
+        .count-remain-badge { background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .count-exceed-badge { background: #ffebee; color: #c62828; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; display: none; }
+
+        /* Allocation result preview */
+        .alloc-preview-box { background: #f0fff4; border: 1.5px solid #a5d6a7; border-radius: 14px; padding: 1rem 1.2rem; margin-top: 1rem; display: none; }
+        .alloc-preview-box.show { display: block; animation: fadeInUp 0.3s ease; }
+        .alloc-preview-box h4 { font-size: 0.8rem; font-weight: 700; color: #2e7d32; margin-bottom: 0.6rem; }
+        .alloc-preview-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #c8e6c9; font-size: 0.78rem; }
+        .alloc-preview-row:last-child { border-bottom: none; }
+        .alloc-preview-row .apr-room { font-family: 'DM Mono', monospace; font-size: 0.72rem; background: var(--navy); color: white; border-radius: 6px; padding: 1px 7px; }
+        .alloc-preview-row .apr-arrow { color: #aaa; }
+        .alloc-preview-row .apr-name { font-weight: 600; color: var(--navy); }
+        .alloc-preview-row .apr-desig { font-size: 0.68rem; color: var(--text-light); }
+        .alloc-preview-row .apr-seq { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--red); background: #ffebee; border-radius: 10px; padding: 1px 6px; margin-left: auto; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; visibility: hidden; opacity: 0; transition: visibility 0.2s, opacity 0.2s; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-card { background: white; border-radius: 28px; width: 90%; max-width: 420px; padding: 1.8rem; text-align: center; }
+        .modal-card h3 { font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 0.8rem; }
+        .modal-card input { width: 100%; padding: 0.7rem; margin: 0.5rem 0; border: 1.5px solid var(--grey); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; }
+        .modal-card button { background: var(--navy); color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 40px; font-weight: 600; margin-top: 0.8rem; cursor: pointer; width: 100%; font-family: 'DM Sans', sans-serif; }
+        .modal-card button.secondary { background: #f0f0f0; color: #333; margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+<div class="scroll-progress-bar" id="scrollProgressBar"></div>
+<div id="app">
+
+    <!-- ═══ LOGIN ═══ -->
+    <div id="loginPage" class="page active">
+        <div class="login-left">
+            <div class="bg-logo-watermark"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt=""></div>
+            <div class="bg-logo-watermark-2"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt=""></div>
+            <div class="deco-ring deco-ring-1"></div>
+            <div class="deco-ring deco-ring-2"></div>
+            <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div>
+            <div class="particle p4"></div><div class="particle p5"></div><div class="particle p6"></div>
+            <div class="top-bar">
+                <div class="logo-mark"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT Logo"></div>
+                <div class="institute-name">
+                    <div class="abbr">AVIT</div>
+                    <div class="full">Aarupadai Veedu Institute of Technology</div>
+                </div>
+            </div>
+            <div class="hero-content">
+                <div class="system-badge"><div class="dot"></div><span>System Live · 2025–26</span></div>
+                <h1 class="hero-title">Exam Duty<span class="accent">Monitor</span></h1>
+                <p class="hero-sub">Smart allocation — True Round-Robin across all rooms. Department analytics, threshold, calendar, swap &amp; deputation.</p>
+                <div class="features-grid">
+                    <div class="feature-card"><span class="feature-icon">🎯</span><h4>True Round-Robin</h4><p>Sequential rotating pointer per department — perfectly fair distribution</p></div>
+                    <div class="feature-card"><span class="feature-icon">🔄</span><h4>Swap &amp; Deputation</h4><p>Request &amp; approve duty changes with free-faculty filter</p></div>
+                    <div class="feature-card"><span class="feature-icon">📊</span><h4>Live Analytics</h4><p>Real-time duty counts and distribution per department</p></div>
+                    <div class="feature-card"><span class="feature-icon">🏛️</span><h4>Dept Analytics</h4><p>Real-time faculty counts and duty distribution</p></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item"><div class="stat-value">7+</div><div class="stat-label">Departments</div></div>
+                    <div class="stat-item"><div class="stat-value">100%</div><div class="stat-label">Fair Allocation</div></div>
+                    <div class="stat-item"><div class="stat-value">RR</div><div class="stat-label">Round-Robin</div></div>
+                </div>
+            </div>
+            <div class="credit-line-blue">Engineered by Varsha Madamala and Naveen Kumar M</div>
+        </div>
+        <div class="login-right">
+            <div class="right-logo-top">
+                <img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT">
+                <div class="rl-text"><div class="rl-abbr">AVIT</div><div class="rl-full">Aarupadai Veedu Institute of Technology</div></div>
+            </div>
+            <div class="login-header"><h2>Welcome Back</h2><p>Sign in to your account</p></div>
+            <div class="role-toggle">
+                <button class="role-btn active" data-role="faculty">👨‍🏫 Faculty</button>
+                <button class="role-btn" data-role="admin">🛡️ Admin</button>
+            </div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="empEmail" placeholder="e.g., balakrishnan.avcs097@avit.ac.in"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="Enter your password"></div>
+            <button class="login-btn" id="loginBtn">Sign In →</button>
+            <div class="demo-hint">
+                <p><strong>Demo Credentials:</strong><br>
+                Admin: <strong>admin@avit.ac.in</strong> / Admin@1234<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>seshadri.avcs0110@avit.ac.in</strong> / Admin@1234<br>
+                Faculty: any CSE email / <strong>Faculty@1234</strong><br>
+                <em>Select the correct role before logging in!</em></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ FACULTY DASHBOARD ═══ -->
+    <div id="facultyDash" class="page">
+        <div class="dash-topbar">
+            <div class="topbar-logo">
+                <div class="topbar-logo-img"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT"></div>
+                <div class="topbar-name-block"><div class="topbar-abbr">AVIT</div><div class="topbar-fullname">Aarupadai Veedu Institute of Technology</div></div>
+            </div>
+            <div class="topbar-divider"></div>
+            <div><div class="topbar-system">Exam Duty Monitor</div><div class="topbar-sub">Faculty Portal</div></div>
+            <div class="topbar-spacer"></div>
+            <div class="topbar-user">
+                <div class="user-info"><div class="user-name" id="facultyName">Faculty</div><div class="user-role" id="facultyRole">CSE</div></div>
+                <div class="user-avatar avatar-faculty" id="facultyAvatar">FM</div>
+                <button class="change-pwd-btn" id="facultyChangePwdBtn">🔑 Change Password</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="dash-body">
+            <div class="sidebar">
+                <div class="sidebar-watermark"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT"></div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">My Duties</div>
+                    <div class="sidebar-item active" data-faculty-view="dashboard"><span class="icon">🏠</span> Dashboard</div>
+                    <div class="sidebar-item" data-faculty-view="upcoming"><span class="icon">📅</span> Upcoming Duties</div>
+                    <div class="sidebar-item" data-faculty-view="history"><span class="icon">📜</span> Duty History</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Exam Types</div>
+                    <div class="sidebar-item" data-faculty-view="iat"><span class="icon">📝</span> IAT Duties</div>
+                    <div class="sidebar-item" data-faculty-view="model"><span class="icon">📋</span> Model Exam</div>
+                    <div class="sidebar-item" data-faculty-view="endsem"><span class="icon">🎓</span> End Semester</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Requests</div>
+                    <div class="sidebar-item" data-faculty-view="swap"><span class="icon">🔄</span> Swap Request</div>
+                    <div class="sidebar-item" data-faculty-view="deputation"><span class="icon">✈️</span> Deputation</div>
+                </div>
+            </div>
+            <div class="dash-main" id="facultyMain"></div>
+        </div>
+    </div>
+
+    <!-- ═══ ADMIN DASHBOARD ═══ -->
+    <div id="adminDash" class="page">
+        <div class="dash-topbar">
+            <div class="topbar-logo">
+                <div class="topbar-logo-img"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT"></div>
+                <div class="topbar-name-block"><div class="topbar-abbr">AVIT</div><div class="topbar-fullname">Aarupadai Veedu Institute of Technology</div></div>
+            </div>
+            <div class="topbar-divider"></div>
+            <div><div class="topbar-system">Exam Duty Monitor</div><div class="topbar-sub">Admin Panel</div></div>
+            <div class="topbar-spacer"></div>
+            <div class="topbar-user">
+                <div class="user-info"><div class="user-name" id="adminName">Admin</div><div class="user-role" id="adminRole">Administrator</div></div>
+                <div class="user-avatar avatar-admin" id="adminAvatar">AD</div>
+                <button class="change-pwd-btn" id="adminChangePwdBtn">🔑 Change Password</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <div class="dash-body">
+            <div class="sidebar">
+                <div class="sidebar-watermark"><img src="https://static.collegedekho.com/media/img/institute/logo/AVIT.jpg" alt="AVIT"></div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Allocation</div>
+                    <div class="sidebar-item active" data-admin-view="dashboard"><span class="icon">🏠</span> Dashboard</div>
+                    <div class="sidebar-item" data-admin-view="allocation"><span class="icon">➕</span> New Allocation</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Management</div>
+                    <div class="sidebar-item" data-admin-view="faculty"><span class="icon">👥</span> Faculty Config</div>
+                    <div class="sidebar-item" data-admin-view="swaps"><span class="icon">🔄</span> Swap Requests</div>
+                    <div class="sidebar-item" data-admin-view="deputations"><span class="icon">✈️</span> Deputations</div>
+                    <div class="sidebar-item" data-admin-view="reports"><span class="icon">📊</span> Reports</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Settings</div>
+                    <div class="sidebar-item" data-admin-view="threshold"><span class="icon">⚙️</span> Threshold</div>
+                    <div class="sidebar-item" data-admin-view="calendar"><span class="icon">📅</span> Calendar</div>
+                </div>
+            </div>
+            <div class="dash-main" id="adminMain"></div>
+        </div>
+    </div>
+</div>
+
+<div id="notif" class="notif"></div>
+<div id="changePwdModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>Change Password</h3>
+        <p style="font-size:12px;color:#888;margin-bottom:4px">Minimum 6 characters</p>
+        <input type="password" id="modalOldPwd" placeholder="Current Password">
+        <input type="password" id="modalNewPwd" placeholder="New Password">
+        <input type="password" id="modalConfirmPwd" placeholder="Confirm New Password">
+        <button id="modalSaveBtn">Save Password</button>
+        <button id="modalSkipBtn" class="secondary">Cancel</button>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const USERS = {
+    'admin@avit.ac.in': { role:'admin', name:'K. Selvam', dept:'Exam Cell', designation:'Exam Cell Administrator', defaultPassword:'Admin@1234' },
+    'seshadri.avcs0110@avit.ac.in': { role:'admin', name:'Mr. B. S. Seshadri', dept:'Exam Cell', designation:'Administrator', defaultPassword:'Admin@1234' },
+    // CSE
+    'balakrishnan.avcs097@avit.ac.in': { role:'faculty', name:'Dr. S. Balakrishnan', dept:'CSE', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'rjaichandran@avit.ac.in': { role:'faculty', name:'Dr. R. Jaichandran', dept:'CSE', designation:'Professor', defaultPassword:'Faculty@1234' },
+    'muthukumaran.avcs0103@avit.ac.in': { role:'faculty', name:'Dr. M. Muthukumaran', dept:'CSE', designation:'Professor', defaultPassword:'Faculty@1234' },
+    'ramu.avcs0105@avit.ac.in': { role:'faculty', name:'Dr. Ramu K', dept:'CSE', designation:'Professor', defaultPassword:'Faculty@1234' },
+    'pitchumaniangayarkanni.avcs0111@avit.ac.in': { role:'faculty', name:'Dr. Pitchumani Angayarkanni', dept:'CSE', designation:'Professor', defaultPassword:'Faculty@1234' },
+    'poonguzhali.avcs0117@avit.ac.in': { role:'faculty', name:'Dr. Poonguzhali S', dept:'CSE', designation:'Professor', defaultPassword:'Faculty@1234' },
+    'kishorekuppuswamy.avcs0107@avit.ac.in': { role:'faculty', name:'Mr. Kishore Kuppuswamy', dept:'CSE', designation:'Professor of Practice', defaultPassword:'Faculty@1234' },
+    'thilagavathi.avcs093@avit.ac.in': { role:'faculty', name:'Dr. Thilagavathi', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'elankavi.avcs0104@avit.ac.in': { role:'faculty', name:'Dr. R. Elankavi', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'ginosophia.avcs0106@avit.ac.in': { role:'faculty', name:'Dr. Gino Sophia S.G.', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'rajesh.avcs0108@avit.ac.in': { role:'faculty', name:'Dr. Rajesh M', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'karthik@avit.ac.in': { role:'faculty', name:'Mr. K. Karthik', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'shobana@avit.ac.in': { role:'faculty', name:'Dr. R. Shobana', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'shanthashalini.avcs086@avit.ac.in': { role:'faculty', name:'Dr. K. Shantha Shalini', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'sarika.avcs0118@avit.ac.in': { role:'faculty', name:'Dr. Sarika N', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'viswanathan.avcs0119@avit.ac.in': { role:'faculty', name:'Dr. R. Viswanathan', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'gayathri.avcs0120@avit.ac.in': { role:'faculty', name:'Ms. D. Gayathri', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'deenadaylan.avcs0121@avit.ac.in': { role:'faculty', name:'Mr. Deenadayalan T', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'thara.cse@avit.ac.in': { role:'faculty', name:'Ms. P. Thara', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'marypraveena.avcs092@avit.ac.in': { role:'faculty', name:'Ms. Mary Praveena J', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'priyadharshini.j@avit.ac.in': { role:'faculty', name:'Ms. J. Priyadharshini', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'simonthomas.avcs096@avit.ac.in': { role:'faculty', name:'Mr. S. Simonthomas', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'udaya.avcs0102@avit.ac.in': { role:'faculty', name:'Ms. Udhaya R', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'jayapriya.avcs0113@avit.ac.in': { role:'faculty', name:'Ms. P. Jayapriya', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'france.avcs0114@avit.ac.in': { role:'faculty', name:'Dr. France', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'nuzhatahmadyatoo.avcs0115@avit.ac.in': { role:'faculty', name:'Mr. Nuzhat Ahmad Yatoo', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'gopinath.avcs0116@avit.ac.in': { role:'faculty', name:'Mr. K. Gopinath', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'manikandan.avcs0122@avit.ac.in': { role:'faculty', name:'Mr. J. Manikandan', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'senthilkumar.avcs0123@avit.ac.in': { role:'faculty', name:'Mr. Senthil Kumar Rajasekaran', dept:'CSE', designation:'Professor of Practice', defaultPassword:'Faculty@1234' },
+    'karthik.avcs0124@avit.ac.in': { role:'faculty', name:'Mr. Karthik S', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'sairamrajendran.avcs0126@avit.ac.in': { role:'faculty', name:'Mr. Sairam R', dept:'CSE', designation:'Associate Professor of Practice', defaultPassword:'Faculty@1234' },
+    'kavitha.avcs0127@avit.ac.in': { role:'faculty', name:'Dr. G. Kavitha', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'thangaprasath.avcs0128@avit.ac.in': { role:'faculty', name:'S. Thanga Prasath', dept:'CSE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    'pushpavathi.avca03@avit.ac.in': { role:'faculty', name:'Dr. K. Pushpavathi', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'arunprasad.avcs0129@avit.ac.in': { role:'faculty', name:'Mr. L. Arunprasad', dept:'CSE', designation:'Associate Professor of Practice', defaultPassword:'Faculty@1234' },
+    'krishnaveni.avcs0130@avit.ac.in': { role:'faculty', name:'Ms. K. Krishnaveni', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'angelinebenitta.avcs0131@avit.ac.in': { role:'faculty', name:'Dr. D. Angeline Benitta', dept:'CSE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'santhakumar.avcs0132@avit.ac.in': { role:'faculty', name:'Mr. Santhakumar R', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'raghul.avec0107@avit.ac.in': { role:'faculty', name:'Mr. Raghul G', dept:'CSE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    // ECE
+    'kumar.avce001@avit.ac.in': { role:'faculty', name:'Dr. P. Kumar', dept:'ECE', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'priya.avce002@avit.ac.in': { role:'faculty', name:'Ms. R. Priya', dept:'ECE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'babu.avce003@avit.ac.in': { role:'faculty', name:'Mr. S. Babu', dept:'ECE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'latha.avce004@avit.ac.in': { role:'faculty', name:'Dr. K. Latha', dept:'ECE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'suresh.avce005@avit.ac.in': { role:'faculty', name:'Mr. T. Suresh', dept:'ECE', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    // EEE
+    'raja.avee001@avit.ac.in': { role:'faculty', name:'Dr. M. Raja', dept:'EEE', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'meena.avee002@avit.ac.in': { role:'faculty', name:'Ms. S. Meena', dept:'EEE', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'selvam.avee003@avit.ac.in': { role:'faculty', name:'Mr. R. Selvam', dept:'EEE', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    // MECH
+    'anand.avme001@avit.ac.in': { role:'faculty', name:'Dr. V. Anand', dept:'MECH', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'vijay.avme002@avit.ac.in': { role:'faculty', name:'Mr. K. Vijay', dept:'MECH', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'devi.avme003@avit.ac.in': { role:'faculty', name:'Ms. A. Devi', dept:'MECH', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'ravi.avme004@avit.ac.in': { role:'faculty', name:'Mr. G. Ravi', dept:'MECH', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' },
+    // CIVIL
+    'senthil.avcv001@avit.ac.in': { role:'faculty', name:'Dr. N. Senthil', dept:'CIVIL', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'kavya.avcv002@avit.ac.in': { role:'faculty', name:'Ms. P. Kavya', dept:'CIVIL', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    // BIOTECH
+    'divya.avbt001@avit.ac.in': { role:'faculty', name:'Dr. S. Divya', dept:'BIOTECH', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'nithya.avbt002@avit.ac.in': { role:'faculty', name:'Ms. L. Nithya', dept:'BIOTECH', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'mohan.avbt003@avit.ac.in': { role:'faculty', name:'Mr. B. Mohan', dept:'BIOTECH', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    // H&S
+    'padma.avhs001@avit.ac.in': { role:'faculty', name:'Dr. T. Padma', dept:'H&S', designation:'Professor and Head', defaultPassword:'Faculty@1234' },
+    'arun.avhs002@avit.ac.in': { role:'faculty', name:'Mr. C. Arun', dept:'H&S', designation:'Associate Professor', defaultPassword:'Faculty@1234' },
+    'supriya.avhs003@avit.ac.in': { role:'faculty', name:'Ms. D. Supriya', dept:'H&S', designation:'Assistant Professor', defaultPassword:'Faculty@1234' },
+    'muthu.avhs004@avit.ac.in': { role:'faculty', name:'Mr. V. Muthu', dept:'H&S', designation:'Assistant Professor-II', defaultPassword:'Faculty@1234' }
+};
+
+const DEPT_META = {
+    'CSE':     { label:'Computer Science & Engg', icon:'💻', bg:'#e8eaf6' },
+    'ECE':     { label:'Electronics & Communication', icon:'📡', bg:'#e3f2fd' },
+    'EEE':     { label:'Electrical & Electronics', icon:'⚡', bg:'#fff8e1' },
+    'MECH':    { label:'Mechanical Engineering', icon:'⚙️', bg:'#e8f5e9' },
+    'CIVIL':   { label:'Civil Engineering', icon:'🏗️', bg:'#f3e5f5' },
+    'BIOTECH': { label:'Biotechnology', icon:'🧬', bg:'#ffebee' },
+    'H&S':     { label:'Humanities & Sciences', icon:'📚', bg:'#e0f2f1' }
+};
+const DEPARTMENTS = ['CSE','ECE','EEE','MECH','CIVIL','BIOTECH','H&S'];
+
+let DUTIES = [];
+let SWAP_REQUESTS = [];
+let DEPUTATION_REQUESTS = [];
+
+const RR_POINTER = {};
+DEPARTMENTS.forEach(d => RR_POINTER[d] = 0);
+
+function getDeptFacultyList(dept) {
+    return Object.entries(USERS)
+        .filter(([, u]) => u.role === 'faculty' && u.dept === dept)
+        .sort((a, b) => a[1].name.localeCompare(b[1].name))
+        .map(([email]) => email);
+}
+
+function roundRobinAllocate(dept, date, session, rooms, count) {
+    const list = getDeptFacultyList(dept);
+    if (!list.length) return [];
+    const need = Math.min(count, rooms.length, list.length);
+    let ptr = RR_POINTER[dept] % list.length;
+    const result = [];
+    let scanned = 0;
+    while (result.length < need && scanned < list.length * 2) {
+        const email = list[ptr % list.length];
+        const busy = DUTIES.some(d =>
+            d.assignedTo === email && d.date === date &&
+            d.session === session && d.status === 'upcoming'
+        );
+        if (!busy) {
+            result.push({ email, room: rooms[result.length], seqIndex: (ptr % list.length) + 1 });
+        }
+        ptr++;
+        scanned++;
+    }
+    return result;
+}
+
+function commitAllocations(dept, date, session, exam, allocations) {
+    allocations.forEach(({ email, room }) => {
+        DUTIES.push({
+            id: DUTIES.length + 1,
+            date, session, room, exam, dept,
+            assignedTo: email,
+            status: 'upcoming'
+        });
+    });
+    const list = getDeptFacultyList(dept);
+    RR_POINTER[dept] = (RR_POINTER[dept] + allocations.length) % list.length;
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+let PASSWORD_STORE = JSON.parse(localStorage.getItem('exam_passwords') || '{}');
+function savePasswords() { localStorage.setItem('exam_passwords', JSON.stringify(PASSWORD_STORE)); }
+function getPassword(email) { return PASSWORD_STORE[email] || (USERS[email] ? USERS[email].defaultPassword : null); }
+function verifyPassword(email, entered) { return getPassword(email) === entered; }
+
+let currentUser = null;
+let selectedRole = 'faculty';
+
+function getDeptFacultyCount(dept) {
+    return Object.values(USERS).filter(u => u.role === 'faculty' && u.dept === dept).length;
+}
+function getDeptDutyCount(dept) {
+    return DUTIES.filter(d => d.dept === dept).length;
+}
+function getDeptFreeFacultyCount(dept) {
+    return Object.entries(USERS).filter(([email, u]) =>
+        u.role === 'faculty' && u.dept === dept &&
+        DUTIES.filter(d => d.assignedTo === email && d.status === 'upcoming').length === 0
+    ).length;
+}
+function getDeptFreeForSlot(dept, date, session) {
+    return Object.entries(USERS).filter(([email, u]) =>
+        u.role === 'faculty' && u.dept === dept &&
+        !DUTIES.some(d => d.assignedTo === email && d.date === date && d.session === session && d.status === 'upcoming')
+    ).length;
+}
+
+function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+function showNotif(msg, type = 'success') {
+    const n = document.getElementById('notif');
+    n.textContent = msg;
+    n.style.background = type === 'error' ? '#c62828' : type === 'info' ? '#0277bd' : '#1b5e20';
+    n.className = 'notif show';
+    n.style.display = 'block';
+    setTimeout(() => { n.className = 'notif'; n.style.display = 'none'; }, 3500);
+}
+function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-IN'); }
+function getFacultyName(email) { return USERS[email]?.name || email; }
+
+function getFreeFacultyForDuty(dutyId) {
+    const duty = DUTIES.find(d => d.id === dutyId);
+    if (!duty) return [];
+    return Object.entries(USERS).filter(([email, u]) => {
+        if (u.role !== 'faculty') return false;
+        if (email === duty.assignedTo) return false;
+        return !DUTIES.some(d =>
+            d.assignedTo === email && d.date === duty.date &&
+            d.session === duty.session && d.status === 'upcoming'
+        );
+    });
+}
+function getAllFreeFaculty() {
+    return Object.entries(USERS).filter(([email, u]) =>
+        u.role === 'faculty' &&
+        DUTIES.filter(d => d.assignedTo === email && d.status === 'upcoming').length === 0
+    );
+}
+
+// ═══════════════════════════════════════════════
+//  PASSWORD MODAL
+// ═══════════════════════════════════════════════
+function showChangePasswordModal() {
+    const modal = document.getElementById('changePwdModal');
+    ['modalOldPwd','modalNewPwd','modalConfirmPwd'].forEach(id => document.getElementById(id).value = '');
+    modal.classList.add('active');
+    document.getElementById('modalSaveBtn').onclick = () => {
+        const old = document.getElementById('modalOldPwd').value;
+        const nw  = document.getElementById('modalNewPwd').value;
+        const cf  = document.getElementById('modalConfirmPwd').value;
+        if (!old) return showNotif('Current password required','error');
+        if (!verifyPassword(currentUser.email, old)) return showNotif('Current password incorrect','error');
+        if (!nw || nw.length < 6) return showNotif('Min 6 characters','error');
+        if (nw !== cf) return showNotif('Passwords do not match','error');
+        PASSWORD_STORE[currentUser.email] = nw;
+        savePasswords();
+        modal.classList.remove('active');
+        showNotif('Password changed! Please login again.');
+        logout();
+    };
+    document.getElementById('modalSkipBtn').onclick = () => modal.classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.role-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedRole = btn.dataset.role;
+    });
+});
+
+function handleLogin() {
+    const email = document.getElementById('empEmail').value.trim().toLowerCase();
+    const password = document.getElementById('password').value.trim();
+    if (!email || !password) return showNotif('Please enter email and password.','error');
+    const user = USERS[email];
+    if (!user) return showNotif('No account found.','error');
+    if (user.role !== selectedRole) return showNotif('Incorrect role. This is a ' + user.role + ' account.','error');
+    if (!verifyPassword(email, password)) return showNotif('Wrong password.','error');
+    currentUser = { email, ...user };
+    showNotif('Welcome, ' + user.name + '!');
+    if (user.role === 'faculty') {
+        document.getElementById('facultyName').textContent = user.name;
+        document.getElementById('facultyRole').textContent = user.designation + ' · ' + user.dept;
+        document.getElementById('facultyAvatar').textContent = user.name.slice(0,2).toUpperCase();
+        document.getElementById('facultyChangePwdBtn').onclick = showChangePasswordModal;
+        showPage('facultyDash');
+        setupFacultySidebar();
+        loadFacultyView('dashboard');
+    } else {
+        document.getElementById('adminName').textContent = user.name;
+        document.getElementById('adminRole').textContent = user.designation;
+        document.getElementById('adminAvatar').textContent = user.name.slice(0,2).toUpperCase();
+        document.getElementById('adminChangePwdBtn').onclick = showChangePasswordModal;
+        showPage('adminDash');
+        setupAdminSidebar();
+        loadAdminView('dashboard');
+    }
+}
+function logout() {
+    currentUser = null;
+    document.getElementById('empEmail').value = '';
+    document.getElementById('password').value = '';
+    showPage('loginPage');
+    showNotif('Logged out.');
+}
+document.getElementById('loginBtn').addEventListener('click', handleLogin);
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+// ═══════════════════════════════════════════════
+//  FACULTY VIEWS
+// ═══════════════════════════════════════════════
+function setupFacultySidebar() {
+    document.querySelectorAll('[data-faculty-view]').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('[data-faculty-view]').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            loadFacultyView(item.dataset.facultyView);
+        });
+    });
+}
+function loadFacultyView(view) {
+    const main = document.getElementById('facultyMain');
+    if (!main || !currentUser) return;
+    if (view === 'swap') { renderSwapRequest(main); return; }
+    if (view === 'deputation') { renderDeputationRequest(main); return; }
+    const myDuties = DUTIES.filter(d => d.assignedTo === currentUser.email);
+    let filtered = myDuties;
+    if (view === 'upcoming') filtered = myDuties.filter(d => d.status === 'upcoming');
+    else if (view === 'history') filtered = myDuties.filter(d => d.status === 'completed');
+    else if (view === 'iat')    filtered = myDuties.filter(d => d.exam.includes('IAT'));
+    else if (view === 'model')  filtered = myDuties.filter(d => d.exam.includes('Model'));
+    else if (view === 'endsem') filtered = myDuties.filter(d => d.exam.includes('End Semester'));
+    const labels = { dashboard:'My Dashboard', upcoming:'Upcoming Duties', history:'Duty History', iat:'IAT Duties', model:'Model Exam Duties', endsem:'End Semester Duties' };
+    const pSwaps = SWAP_REQUESTS.filter(r => r.requestorEmail === currentUser.email && r.status === 'pending').length;
+    const pDeps  = DEPUTATION_REQUESTS.filter(r => r.requestorEmail === currentUser.email && r.status === 'pending').length;
+    const tableRows = filtered.map(d =>
+        '<tr><td>' + formatDate(d.date) + '</td>' +
+        '<td>' + (d.session==='FN'?'Forenoon':'Afternoon') + '</td>' +
+        '<td>' + d.exam + '</td><td>' + d.room + '</td>' +
+        '<td><span class="badge ' + (d.status==='upcoming'?'badge-warning':'badge-success') + '">' + d.status + '</span></td></tr>'
+    ).join('');
+    main.innerHTML =
+        '<div class="view-header"><h2>' + (labels[view]||view) + '</h2>' +
+        '<p>' + filtered.length + ' dut' + (filtered.length!==1?'ies':'y') + ' found</p></div>' +
+        (view==='dashboard' ?
+            '<div class="stats-cards">' +
+            '<div class="stat-card"><span class="card-icon">📅</span><div><div class="card-value">' + myDuties.filter(d=>d.status==='upcoming').length + '</div><div class="card-label">Upcoming Duties</div></div></div>' +
+            '<div class="stat-card"><span class="card-icon">✅</span><div><div class="card-value">' + myDuties.filter(d=>d.status==='completed').length + '</div><div class="card-label">Completed</div></div></div>' +
+            '<div class="stat-card"><span class="card-icon">🔄</span><div><div class="card-value">' + pSwaps + '</div><div class="card-label">Pending Swaps</div></div></div>' +
+            '<div class="stat-card"><span class="card-icon">✈️</span><div><div class="card-value">' + pDeps + '</div><div class="card-label">Pending Deputations</div></div></div>' +
+            '</div>' : '') +
+        '<div class="section-card"><div class="section-card-header"><h3>Duties</h3></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Session</th><th>Exam</th><th>Room</th><th>Status</th></tr></thead>' +
+        '<tbody>' + (tableRows || '<tr><td colspan="5"><div class="empty-state"><span class="empty-icon">📭</span>No duties found.</div></td></tr>') + '</tbody></table></div></div>';
+}
+
+function renderSwapRequest(main) {
+    const myUpcoming = DUTIES.filter(d => d.assignedTo === currentUser.email && d.status === 'upcoming');
+    const myRequests = SWAP_REQUESTS.filter(r => r.requestorEmail === currentUser.email);
+    const dutyOptions = myUpcoming.map(d =>
+        '<option value="' + d.id + '">' + formatDate(d.date) + ' | ' + d.session + ' | ' + d.exam + ' | Room: ' + d.room + '</option>'
+    ).join('');
+    const rows = myRequests.map(r => {
+        const duty = DUTIES.find(d => d.id === r.myDutyId);
+        return '<tr>' +
+            '<td>' + (duty?formatDate(duty.date):'—') + '</td>' +
+            '<td>' + (duty?duty.exam:'—') + '</td>' +
+            '<td>' + (duty?duty.room:'—') + '</td>' +
+            '<td>' + (r.preferredFacultyEmail ? getFacultyName(r.preferredFacultyEmail) : 'Anyone free') + '</td>' +
+            '<td>' + r.reason + '</td>' +
+            '<td>' + formatDate(r.submittedOn) + '</td>' +
+            '<td><span class="badge ' + (r.status==='pending'?'badge-warning':r.status==='approved'?'badge-success':'badge-red') + '">' + r.status + '</span></td></tr>';
+    }).join('');
+    main.innerHTML =
+        '<div class="view-header"><h2>Swap Request</h2><p>Request to swap your exam duty with another free faculty member</p></div>' +
+        '<div class="info-banner"><span class="info-icon">ℹ️</span><div>The preferred faculty dropdown only shows faculty <strong>free on the same date &amp; session</strong>.</div></div>' +
+        '<div class="two-col"><div><div class="form-card">' +
+        '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);margin-bottom:1rem;font-size:1rem;">Submit New Swap Request</h3>' +
+        (myUpcoming.length === 0
+            ? '<div class="empty-state"><span class="empty-icon">📭</span>No upcoming duties to swap.</div>'
+            : '<div class="form-group"><label>Select My Duty to Swap</label><select id="swapMyDuty" onchange="updateSwapFreeList()">' +
+              '<option value="">-- Choose a duty --</option>' + dutyOptions + '</select></div>' +
+              '<div class="form-group"><label>Preferred Faculty <span class="free-badge">Auto-filtered</span></label><select id="swapPreferredFaculty"><option value="">-- Select a duty first --</option></select></div>' +
+              '<div class="form-group"><label>Reason for Swap</label><textarea id="swapReason" placeholder="e.g., Conference attendance..."></textarea></div>' +
+              '<button class="btn-primary" onclick="submitSwapRequest()">Submit Swap Request</button>'
+        ) +
+        '</div></div><div><div class="section-card"><div class="section-card-header"><h3>My Swap Requests (' + myRequests.length + ')</h3></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Exam</th><th>Room</th><th>Preferred</th><th>Reason</th><th>Submitted</th><th>Status</th></tr></thead>' +
+        '<tbody>' + (rows || '<tr><td colspan="7"><div class="empty-state"><span class="empty-icon">📭</span>No requests yet.</div></td></tr>') + '</tbody></table></div></div>' +
+        '</div></div>';
+}
+window.updateSwapFreeList = function() {
+    const dutyId = parseInt(document.getElementById('swapMyDuty').value);
+    const sel = document.getElementById('swapPreferredFaculty');
+    if (!dutyId) { sel.innerHTML = '<option value="">-- Select a duty first --</option>'; return; }
+    const ff = getFreeFacultyForDuty(dutyId);
+    sel.innerHTML = ff.length === 0
+        ? '<option value="">No free faculty on this slot</option>'
+        : '<option value="">-- Select preferred faculty --</option>' +
+          ff.map(([e, u]) => '<option value="' + e + '">' + u.name + ' (' + u.designation + ')</option>').join('');
+};
+window.submitSwapRequest = function() {
+    const dutyId = parseInt(document.getElementById('swapMyDuty').value);
+    const preferred = document.getElementById('swapPreferredFaculty').value;
+    const reason = document.getElementById('swapReason').value.trim();
+    if (!dutyId) return showNotif('Select a duty','error');
+    if (!reason) return showNotif('Please provide a reason','error');
+    SWAP_REQUESTS.push({
+        id: SWAP_REQUESTS.length + 1,
+        requestorName: currentUser.name,
+        requestorEmail: currentUser.email,
+        myDutyId: dutyId,
+        preferredFacultyEmail: preferred || null,
+        reason,
+        submittedOn: new Date().toISOString().split('T')[0],
+        status: 'pending',
+        resolvedBy: null
+    });
+    showNotif('Swap request submitted!');
+    renderSwapRequest(document.getElementById('facultyMain'));
+};
+
+function renderDeputationRequest(main) {
+    const myUpcoming = DUTIES.filter(d => d.assignedTo === currentUser.email && d.status === 'upcoming');
+    const myDeps = DEPUTATION_REQUESTS.filter(r => r.requestorEmail === currentUser.email);
+    const dutyOptions = myUpcoming.map(d =>
+        '<option value="' + d.id + '">' + formatDate(d.date) + ' | ' + d.session + ' | ' + d.exam + ' | Room: ' + d.room + '</option>'
+    ).join('');
+    const depRows = myDeps.map(r => {
+        const duty = DUTIES.find(d => d.id === r.dutyId);
+        return '<tr>' +
+            '<td>' + (duty?formatDate(duty.date):'—') + '</td>' +
+            '<td>' + (duty?duty.exam:'—') + '</td>' +
+            '<td>' + r.purpose + '</td>' +
+            '<td>' + (r.remarks||'—') + '</td>' +
+            '<td>' + formatDate(r.submittedOn) + '</td>' +
+            '<td><span class="badge ' + (r.status==='pending'?'badge-warning':r.status==='approved'?'badge-success':'badge-red') + '">' + r.status + '</span></td></tr>';
+    }).join('');
+    const allFree = getAllFreeFaculty();
+    main.innerHTML =
+        '<div class="view-header"><h2>Deputation Request</h2><p>Apply for deputation — official external duty during an exam period</p></div>' +
+        '<div class="info-banner"><span class="info-icon">ℹ️</span><div>Deputation covers official assignments like conferences, training, or university events.</div></div>' +
+        '<div class="two-col"><div><div class="form-card">' +
+        '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);margin-bottom:1rem;font-size:1rem;">Submit Deputation Request</h3>' +
+        (myUpcoming.length === 0
+            ? '<div class="empty-state"><span class="empty-icon">📭</span>No upcoming duties found.</div>'
+            : '<div class="form-group"><label>Duty to be Skipped</label><select id="depDutyId"><option value="">-- Choose duty --</option>' + dutyOptions + '</select></div>' +
+              '<div class="form-group"><label>Purpose / Event Name</label><input type="text" id="depPurpose" placeholder="e.g., National Conference on AI..."></div>' +
+              '<div class="form-group"><label>Deputation Start Date</label><input type="date" id="depStart"></div>' +
+              '<div class="form-group"><label>Deputation End Date</label><input type="date" id="depEnd"></div>' +
+              '<div class="form-group"><label>Additional Remarks (optional)</label><textarea id="depRemarks" placeholder="Any supporting details..."></textarea></div>' +
+              '<button class="btn-primary" onclick="submitDeputationRequest()">Submit Deputation Request</button>'
+        ) +
+        '</div></div><div>' +
+        '<div class="section-card" style="margin-bottom:1rem;"><div class="section-card-header"><h3>My Deputation Requests (' + myDeps.length + ')</h3></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Duty Date</th><th>Exam</th><th>Purpose</th><th>Remarks</th><th>Submitted</th><th>Status</th></tr></thead>' +
+        '<tbody>' + (depRows || '<tr><td colspan="6"><div class="empty-state"><span class="empty-icon">📭</span>No requests yet.</div></td></tr>') + '</tbody></table></div></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>Free Faculty (' + allFree.length + ')</h3></div>' +
+        '<div style="padding:1rem;max-height:220px;overflow-y:auto;">' +
+        (allFree.length === 0
+            ? '<div class="empty-state">All faculty have duties.</div>'
+            : allFree.map(([e, u]) =>
+                '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f0f2f8;">' +
+                '<div style="width:30px;height:30px;background:linear-gradient(135deg,#2196f3,#1565c0);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">' +
+                u.name.slice(0,2).toUpperCase() + '</div>' +
+                '<div><div style="font-size:12px;font-weight:600;color:var(--navy)">' + u.name + '</div>' +
+                '<div style="font-size:10px;color:var(--text-light)">' + u.designation + ' · ' + u.dept + '</div></div>' +
+                '<span class="free-badge" style="margin-left:auto">Free</span></div>'
+              ).join('')) +
+        '</div></div></div></div>';
+}
+window.submitDeputationRequest = function() {
+    const dutyId   = parseInt(document.getElementById('depDutyId').value);
+    const purpose  = document.getElementById('depPurpose').value.trim();
+    const start    = document.getElementById('depStart').value;
+    const end      = document.getElementById('depEnd').value;
+    const remarks  = document.getElementById('depRemarks').value.trim();
+    if (!dutyId)  return showNotif('Select the duty to skip','error');
+    if (!purpose) return showNotif('Enter the deputation purpose','error');
+    if (!start||!end) return showNotif('Enter deputation dates','error');
+    if (start > end) return showNotif('End date must be after start date','error');
+    DEPUTATION_REQUESTS.push({
+        id: DEPUTATION_REQUESTS.length + 1,
+        requestorName: currentUser.name, requestorEmail: currentUser.email,
+        dutyId, purpose, startDate: start, endDate: end, remarks,
+        submittedOn: new Date().toISOString().split('T')[0],
+        status: 'pending', resolvedBy: null
+    });
+    showNotif('Deputation request submitted!');
+    renderDeputationRequest(document.getElementById('facultyMain'));
+};
+
+// ═══════════════════════════════════════════════
+//  ADMIN VIEWS
+// ═══════════════════════════════════════════════
+function setupAdminSidebar() {
+    document.querySelectorAll('[data-admin-view]').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('[data-admin-view]').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            loadAdminView(item.dataset.adminView);
+        });
+    });
+}
+function loadAdminView(view) {
+    const main = document.getElementById('adminMain');
+    if (!main) return;
+    if (view === 'dashboard')   { main.innerHTML = adminDashboardHTML(); return; }
+    if (view === 'allocation')  { main.innerHTML = adminAllocationHTML(); setupAllocationForm(); return; }
+    if (view === 'faculty')     { main.innerHTML = adminFacultyConfigHTML(); return; }
+    if (view === 'swaps')       { renderAdminSwaps(main); return; }
+    if (view === 'deputations') { renderAdminDeputations(main); return; }
+    if (view === 'reports')     { main.innerHTML = adminReportsHTML(); return; }
+    if (view === 'threshold')   { main.innerHTML = adminThresholdHTML(); return; }
+    if (view === 'calendar')    { main.innerHTML = adminCalendarHTML(); return; }
+    main.innerHTML = '<div class="empty-state">View not found</div>';
+}
+
+function adminDashboardHTML() {
+    const total = Object.values(USERS).filter(u => u.role === 'faculty').length;
+    const pSwaps = SWAP_REQUESTS.filter(r => r.status === 'pending').length;
+    const pDeps  = DEPUTATION_REQUESTS.filter(r => r.status === 'pending').length;
+    let deptCards = '<div class="section-card"><div class="section-card-header"><h3>Department Overview</h3></div><div class="dept-stats-grid">';
+    DEPARTMENTS.forEach(dept => {
+        const m = DEPT_META[dept] || {};
+        const fac  = getDeptFacultyCount(dept);
+        const duty = getDeptDutyCount(dept);
+        const free = getDeptFreeFacultyCount(dept);
+        const ptr  = RR_POINTER[dept] || 0;
+        const list = getDeptFacultyList(dept);
+        const nextName = list.length ? USERS[list[ptr % list.length]]?.name?.split(' ').slice(-1)[0] : '—';
+        deptCards +=
+            '<div class="dept-stat-tile">' +
+            '<h4>' + (m.icon||'') + ' ' + dept + '</h4>' +
+            '<div class="dept-count-faculty">' + fac + '</div>' +
+            '<div style="font-size:0.72rem;color:var(--text-light)">Faculty</div>' +
+            '<div style="margin-top:6px;font-size:0.75rem;">📋 ' + duty + ' duties</div>' +
+            '<div style="margin-top:4px;font-size:0.7rem;color:#2e7d32">✓ ' + free + ' free</div>' +
+            '<div style="margin-top:4px;font-size:0.65rem;color:var(--red);font-family:\'DM Mono\',monospace;">Next: ' + nextName + '</div>' +
+            '</div>';
+    });
+    deptCards += '</div></div>';
+    const dutyRows = DUTIES.slice().reverse().slice(0, 20).map(d =>
+        '<tr><td>' + formatDate(d.date) + '</td><td><span class="badge badge-info">' + d.session + '</span></td>' +
+        '<td>' + d.exam + '</td><td style="font-family:\'DM Mono\',monospace;font-size:0.75rem">' + d.room + '</td>' +
+        '<td><span class="badge badge-warning">' + d.dept + '</span></td>' +
+        '<td>' + getFacultyName(d.assignedTo) + '</td>' +
+        '<td><span class="badge ' + (d.status==='upcoming'?'badge-warning':'badge-success') + '">' + d.status + '</span></td></tr>'
+    ).join('');
+    return '<div class="view-header"><h2>Admin Dashboard</h2><p>Live overview · ' + new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) + '</p></div>' +
+        '<div class="stats-cards">' +
+        '<div class="stat-card"><span class="card-icon">👥</span><div><div class="card-value">' + total + '</div><div class="card-label">Total Faculty</div></div></div>' +
+        '<div class="stat-card"><span class="card-icon">📋</span><div><div class="card-value">' + DUTIES.length + '</div><div class="card-label">Total Duties</div></div></div>' +
+        '<div class="stat-card"><span class="card-icon">🔄</span><div><div class="card-value">' + pSwaps + '</div><div class="card-label">Pending Swaps</div></div></div>' +
+        '<div class="stat-card"><span class="card-icon">✈️</span><div><div class="card-value">' + pDeps + '</div><div class="card-label">Pending Deputations</div></div></div>' +
+        '</div>' +
+        deptCards +
+        '<div class="section-card"><div class="section-card-header"><h3>Recent Duties (latest 20)</h3></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Session</th><th>Exam</th><th>Room</th><th>Dept</th><th>Faculty</th><th>Status</th></tr></thead>' +
+        '<tbody>' + (dutyRows || '<tr><td colspan="7"><div class="empty-state"><span class="empty-icon">📭</span>No duties yet. Use "New Allocation".</div></td></tr>') + '</tbody></table></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+//  ALLOCATION VIEW — RR Queue & Dept Sidebar REMOVED
+// ═══════════════════════════════════════════════
+function adminAllocationHTML() {
+    const deptOptions = DEPARTMENTS.map(dept => {
+        const cnt = getDeptFacultyCount(dept);
+        const m = DEPT_META[dept] || {};
+        return '<option value="' + dept + '">' + (m.icon||'') + ' ' + dept + ' — ' + cnt + ' faculty</option>';
+    }).join('');
+
+    const defaultDept = 'CSE';
+    const defFac   = getDeptFacultyCount(defaultDept);
+    const defDuty  = getDeptDutyCount(defaultDept);
+    const defFree  = getDeptFreeFacultyCount(defaultDept);
+
+    let roomOptions = '';
+    for (let i = 201; i <= 218; i++) roomOptions += '<option value="TBC' + i + '">TBC' + i + '</option>';
+
+    return '<div class="view-header"><h2>New Allocation — Round-Robin</h2>' +
+        '<p>Faculty are selected in a fixed rotating order per department, ensuring perfectly fair distribution over time.</p></div>' +
+
+        '<div class="form-card" style="max-width:680px;">' +
+
+        '<div class="form-group"><label>Department</label>' +
+        '<select id="allocDept" onchange="onAllocDeptChange(this.value)">' + deptOptions + '</select></div>' +
+
+        // Dept Snapshot
+        '<div class="dept-preview-panel" id="deptPreviewPanel">' +
+        '<div class="dept-preview-title">Department Snapshot &nbsp;<span class="dept-tag" id="deptPreviewTag">' + defaultDept + '</span></div>' +
+        '<div class="dept-preview-grid">' +
+        '<div class="dept-preview-tile highlight"><div class="dpv" id="dpvFaculty">' + defFac + '</div><div class="dpl">Total Faculty</div></div>' +
+        '<div class="dept-preview-tile"><div class="dpv" id="dpvDuties">' + defDuty + '</div><div class="dpl">Duties Assigned</div></div>' +
+        '<div class="dept-preview-tile"><div class="dpv" id="dpvFree">' + defFree + '</div><div class="dpl">Free Faculty</div></div>' +
+        '</div></div>' +
+
+        // Faculty count
+        '<div class="faculty-count-section"><label>Number of Faculty to Allocate</label>' +
+        '<div class="count-input-row">' +
+        '<button class="count-stepper-btn" type="button" onclick="adjustFacultyCount(-1)">−</button>' +
+        '<input type="number" class="count-number-input" id="facultyCount" value="1" min="1" max="' + defFac + '" oninput="onFacultyCountChange()">' +
+        '<button class="count-stepper-btn" type="button" onclick="adjustFacultyCount(1)">+</button>' +
+        '</div>' +
+        '<div class="count-hint-row">' +
+        '<span class="count-hint-avail" id="countHintAvail">✓ <span id="remainCount">' + (defFree - 1) + '</span> faculty remain free</span>' +
+        '<span class="count-hint-warn" id="countHintWarn">⚠ Exceeds available faculty</span>' +
+        '<span class="count-remain-badge" id="countRemainBadge">' + defFree + ' available</span>' +
+        '<span class="count-exceed-badge" id="countExceedBadge">Over limit</span>' +
+        '</div></div>' +
+
+        // Exam / Date / Session / Rooms
+        '<div class="form-group" style="margin-top:1rem"><label>Exam Type</label>' +
+        '<select id="allocExam"><option>IAT-1</option><option>IAT-2</option><option>Model Exam</option><option>End Semester</option></select></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+        '<div class="form-group"><label>Date</label><input type="date" id="allocDate" onchange="onAllocSlotChange()"></div>' +
+        '<div class="form-group"><label>Session</label><select id="allocSession" onchange="onAllocSlotChange()"><option value="FN">Forenoon (FN)</option><option value="AN">Afternoon (AN)</option></select></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+        '<div class="form-group"><label>From Room</label><select id="fromRoom">' + roomOptions + '</select></div>' +
+        '<div class="form-group"><label>To Room</label><select id="toRoom">' + roomOptions + '</select></div>' +
+        '</div>' +
+
+        '<button class="btn-primary" id="previewAllocBtn" style="width:100%;padding:0.75rem;font-size:14px;margin-bottom:0.6rem">👁 Preview Allocation</button>' +
+        '<button class="btn-primary" id="rangeAllocateBtn" style="width:100%;padding:0.75rem;font-size:14px;background:linear-gradient(135deg,#2e7d32,#1b5e20)">🎯 Confirm &amp; Allocate (Round-Robin)</button>' +
+
+        // Preview box
+        '<div class="alloc-preview-box" id="allocPreviewBox"><h4>📋 Allocation Preview (will be committed)</h4><div id="allocPreviewRows"></div></div>' +
+
+        '</div>';
+}
+
+window.onAllocDeptChange = function(dept) {
+    if (!dept) return;
+    const fac   = getDeptFacultyCount(dept);
+    const duty  = getDeptDutyCount(dept);
+    const free  = getDeptFreeFacultyCount(dept);
+
+    const el = id => document.getElementById(id);
+    el('deptPreviewTag').textContent = dept;
+    el('dpvFaculty').textContent     = fac;
+    el('dpvDuties').textContent      = duty;
+    el('dpvFree').textContent        = free;
+
+    const inp = el('facultyCount');
+    if (inp) { inp.max = fac; inp.value = 1; }
+
+    onFacultyCountChange();
+    clearPreview();
+};
+
+window.onAllocSlotChange = function() {
+    onFacultyCountChange();
+    clearPreview();
+};
+
+window.adjustFacultyCount = function(delta) {
+    const inp = document.getElementById('facultyCount');
+    if (!inp) return;
+    let v = (parseInt(inp.value) || 0) + delta;
+    v = Math.max(1, v);
+    inp.value = v;
+    onFacultyCountChange();
+    clearPreview();
+};
+
+window.onFacultyCountChange = function() {
+    const inp  = document.getElementById('facultyCount');
+    if (!inp) return;
+    const dept    = (document.getElementById('allocDept') || {}).value;
+    const date    = (document.getElementById('allocDate') || {}).value;
+    const session = (document.getElementById('allocSession') || {}).value;
+    const free = date && session ? getDeptFreeForSlot(dept, date, session) : getDeptFreeFacultyCount(dept);
+    const v    = parseInt(inp.value) || 0;
+    const remain = free - v;
+    const hintAvail   = document.getElementById('countHintAvail');
+    const hintWarn    = document.getElementById('countHintWarn');
+    const remainBadge = document.getElementById('countRemainBadge');
+    const exceedBadge = document.getElementById('countExceedBadge');
+    const remainEl    = document.getElementById('remainCount');
+    if (v > free) {
+        if (hintAvail)   hintAvail.style.display   = 'none';
+        if (hintWarn)    hintWarn.style.display    = 'inline';
+        if (remainBadge) remainBadge.style.display = 'none';
+        if (exceedBadge) exceedBadge.style.display = 'inline-block';
+    } else {
+        if (hintAvail)   hintAvail.style.display   = 'inline';
+        if (hintWarn)    hintWarn.style.display    = 'none';
+        if (remainBadge) remainBadge.style.display = 'inline-block';
+        if (exceedBadge) exceedBadge.style.display = 'none';
+        if (remainEl)    remainEl.textContent      = remain;
+        if (remainBadge) remainBadge.textContent   = free + ' available';
+    }
+};
+
+function clearPreview() {
+    const box = document.getElementById('allocPreviewBox');
+    if (box) box.classList.remove('show');
+}
+
+function setupAllocationForm() {
+    onAllocDeptChange('CSE');
+
+    // Preview button
+    document.getElementById('previewAllocBtn').onclick = () => {
+        const dept    = document.getElementById('allocDept').value;
+        const date    = document.getElementById('allocDate').value;
+        const session = document.getElementById('allocSession').value;
+        const count   = parseInt(document.getElementById('facultyCount').value) || 0;
+        const fromNum = parseInt(document.getElementById('fromRoom').value.replace('TBC',''));
+        const toNum   = parseInt(document.getElementById('toRoom').value.replace('TBC',''));
+
+        if (!dept) return showNotif('Select a department','error');
+        if (!date) return showNotif('Select a date','error');
+        if (fromNum > toNum) return showNotif('Invalid room range','error');
+        if (count < 1) return showNotif('Enter at least 1','error');
+
+        const rooms = [];
+        for (let i = fromNum; i <= toNum; i++) rooms.push('TBC' + i);
+        const allocs = roundRobinAllocate(dept, date, session, rooms, count);
+
+        if (!allocs.length) {
+            showNotif('No available faculty for this slot in ' + dept, 'error');
+            return;
+        }
+        const box  = document.getElementById('allocPreviewBox');
+        const rows = document.getElementById('allocPreviewRows');
+        rows.innerHTML = allocs.map(a => {
+            const u = USERS[a.email] || {};
+            return '<div class="alloc-preview-row">' +
+                '<span class="apr-room">' + a.room + '</span>' +
+                '<span class="apr-arrow">→</span>' +
+                '<div><div class="apr-name">' + (u.name||a.email) + '</div>' +
+                '<div class="apr-desig">' + (u.designation||'') + '</div></div>' +
+                '<span class="apr-seq">RR #' + a.seqIndex + '</span>' +
+                '</div>';
+        }).join('');
+        box.classList.add('show');
+        showNotif('Preview ready — ' + allocs.length + ' faculty shown. Click Confirm to commit.', 'info');
+    };
+
+    // Confirm & Allocate
+    document.getElementById('rangeAllocateBtn').onclick = () => {
+        const dept    = document.getElementById('allocDept').value;
+        const exam    = document.getElementById('allocExam').value;
+        const date    = document.getElementById('allocDate').value;
+        const session = document.getElementById('allocSession').value;
+        const count   = parseInt(document.getElementById('facultyCount').value) || 0;
+        const fromNum = parseInt(document.getElementById('fromRoom').value.replace('TBC',''));
+        const toNum   = parseInt(document.getElementById('toRoom').value.replace('TBC',''));
+
+        if (!dept) return showNotif('Select a department','error');
+        if (!date) return showNotif('Select a date','error');
+        if (count < 1) return showNotif('Enter at least 1','error');
+        if (fromNum > toNum) return showNotif('Invalid room range','error');
+
+        const slotFree = getDeptFreeForSlot(dept, date, session);
+        if (count > slotFree) return showNotif('Only ' + slotFree + ' faculty free for this slot in ' + dept, 'error');
+
+        const rooms = [];
+        for (let i = fromNum; i <= toNum; i++) rooms.push('TBC' + i);
+
+        const allocs = roundRobinAllocate(dept, date, session, rooms, count);
+        if (!allocs.length) return showNotif('No available faculty for this slot', 'error');
+
+        commitAllocations(dept, date, session, exam, allocs);
+        showNotif('✅ Allocated ' + allocs.length + ' dut' + (allocs.length !== 1 ? 'ies' : 'y') + ' to ' + dept + ' (RR pointer now at #' + ((RR_POINTER[dept]) + 1) + ')');
+
+        onAllocDeptChange(dept);
+        clearPreview();
+    };
+}
+
+// ═══════════════════════════════════════════════
+//  FACULTY CONFIG
+// ═══════════════════════════════════════════════
+function adminFacultyConfigHTML() {
+    const list = Object.entries(USERS).filter(([, u]) => u.role === 'faculty');
+    const rows = list.map(([email, u]) =>
+        '<tr><td>' + u.name + '</td><td style="font-size:0.72rem;font-family:\'DM Mono\',monospace">' + email + '</td>' +
+        '<td><span class="badge badge-info">' + u.dept + '</span></td>' +
+        '<td>' + u.designation + '</td>' +
+        '<td><span class="badge badge-warning">' + DUTIES.filter(d => d.assignedTo === email).length + '</span></td>' +
+        '<td style="font-family:\'DM Mono\',monospace;font-size:0.72rem;color:var(--red)">RR #' + ((getDeptFacultyList(u.dept).indexOf(email) + 1) || '?') + '</td>' +
+        '</tr>'
+    ).join('');
+    return '<div class="view-header"><h2>Faculty Configuration <span style="font-size:14px;color:var(--text-light);font-family:\'DM Sans\',sans-serif">(' + list.length + ' total)</span></h2></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Duties</th><th>RR Order</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
+}
+
+// ═══════════════════════════════════════════════
+//  ADMIN SWAP MANAGEMENT
+// ═══════════════════════════════════════════════
+function renderAdminSwaps(main) {
+    const pending  = SWAP_REQUESTS.filter(r => r.status === 'pending');
+    const resolved = SWAP_REQUESTS.filter(r => r.status !== 'pending');
+
+    const pendingCards = pending.length === 0
+        ? '<div class="empty-state"><span class="empty-icon">✅</span>No pending swap requests.</div>'
+        : pending.map(r => {
+            const duty = DUTIES.find(d => d.id === r.myDutyId);
+            const ff   = duty ? getFreeFacultyForDuty(duty.id) : [];
+            const freeOpts = ff.map(([e, u]) => '<option value="' + e + '">' + u.name + ' (' + u.designation + ')</option>').join('');
+            return '<div class="request-card"><div class="rc-top"><div>' +
+                '<div class="rc-title">🔄 ' + r.requestorName + ' wants to swap</div>' +
+                '<div class="rc-meta">' + (duty ? formatDate(duty.date) + ' · ' + duty.exam + ' · Room ' + duty.room : 'Duty not found') + ' · Submitted ' + formatDate(r.submittedOn) + '</div>' +
+                '</div><span class="badge badge-warning">Pending</span></div>' +
+                '<div class="rc-reason">📝 ' + r.reason + '</div>' +
+                '<div style="margin-bottom:0.8rem"><label style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--text-mid);display:block;margin-bottom:4px">Reassign to (free faculty):</label>' +
+                '<select id="swapAssign_' + r.id + '" style="padding:7px 10px;border:1.5px solid #e0e3f0;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:13px;background:#f8f9fe;min-width:260px">' +
+                '<option value="">-- Select free faculty --</option>' + freeOpts + '</select></div>' +
+                '<div class="rc-actions"><button class="btn-success" onclick="approveSwap(' + r.id + ')">✅ Approve</button><button class="btn-danger" onclick="rejectSwap(' + r.id + ')">❌ Reject</button></div></div>';
+        }).join('');
+
+    const resolvedRows = resolved.map(r => {
+        const duty = DUTIES.find(d => d.id === r.myDutyId);
+        return '<tr><td>' + r.requestorName + '</td><td>' + (duty?formatDate(duty.date):'—') + '</td>' +
+            '<td>' + (duty?duty.exam:'—') + '</td><td>' + r.reason + '</td>' +
+            '<td>' + formatDate(r.submittedOn) + '</td>' +
+            '<td><span class="badge ' + (r.status==='approved'?'badge-success':'badge-red') + '">' + r.status + '</span></td></tr>';
+    }).join('');
+
+    main.innerHTML =
+        '<div class="view-header"><h2>Swap Requests</h2><p>' + pending.length + ' pending · ' + resolved.length + ' resolved</p></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>⏳ Pending</h3></div><div style="padding:1rem">' + pendingCards + '</div></div>' +
+        (resolved.length > 0
+            ? '<div class="section-card"><div class="section-card-header"><h3>✅ Resolved</h3></div>' +
+              '<div class="table-wrap"><table class="data-table"><thead><tr><th>Faculty</th><th>Date</th><th>Exam</th><th>Reason</th><th>Submitted</th><th>Status</th></tr></thead>' +
+              '<tbody>' + resolvedRows + '</tbody></table></div></div>'
+            : '');
+}
+window.approveSwap = function(reqId) {
+    const req = SWAP_REQUESTS.find(r => r.id === reqId);
+    if (!req) return;
+    const assignEmail = (document.getElementById('swapAssign_' + reqId)||{}).value;
+    if (!assignEmail) return showNotif('Please select a faculty','error');
+    const duty = DUTIES.find(d => d.id === req.myDutyId);
+    if (duty) { duty.assignedTo = assignEmail; duty.dept = USERS[assignEmail]?.dept || duty.dept; }
+    req.status = 'approved'; req.resolvedBy = currentUser.email;
+    showNotif('Swap approved. Duty reassigned to ' + getFacultyName(assignEmail));
+    renderAdminSwaps(document.getElementById('adminMain'));
+};
+window.rejectSwap = function(reqId) {
+    const req = SWAP_REQUESTS.find(r => r.id === reqId);
+    if (req) { req.status = 'rejected'; req.resolvedBy = currentUser.email; }
+    showNotif('Swap request rejected.');
+    renderAdminSwaps(document.getElementById('adminMain'));
+};
+
+// ═══════════════════════════════════════════════
+//  ADMIN DEPUTATION MANAGEMENT
+// ═══════════════════════════════════════════════
+function renderAdminDeputations(main) {
+    const pending  = DEPUTATION_REQUESTS.filter(r => r.status === 'pending');
+    const resolved = DEPUTATION_REQUESTS.filter(r => r.status !== 'pending');
+
+    const pendingCards = pending.length === 0
+        ? '<div class="empty-state"><span class="empty-icon">✅</span>No pending deputation requests.</div>'
+        : pending.map(r => {
+            const duty = DUTIES.find(d => d.id === r.dutyId);
+            const ff   = duty ? getFreeFacultyForDuty(duty.id) : [];
+            const freeOpts = ff.map(([e, u]) => '<option value="' + e + '">' + u.name + ' (' + u.designation + ')</option>').join('');
+            return '<div class="request-card"><div class="rc-top"><div>' +
+                '<div class="rc-title">✈️ ' + r.requestorName + ' deputation request</div>' +
+                '<div class="rc-meta">' + (duty ? 'Duty: '+formatDate(duty.date)+' · '+duty.exam+' · Room '+duty.room : 'No duty linked') + ' · Submitted ' + formatDate(r.submittedOn) + '</div>' +
+                '</div><span class="badge badge-purple">Pending</span></div>' +
+                '<div class="rc-reason">🎯 ' + r.purpose + '</div>' +
+                '<div style="font-size:0.8rem;color:var(--text-mid);margin-bottom:0.8rem">Duration: ' + formatDate(r.startDate) + ' → ' + formatDate(r.endDate) + '</div>' +
+                (r.remarks ? '<div style="font-size:0.8rem;color:var(--text-mid);margin-bottom:0.8rem">Remarks: ' + r.remarks + '</div>' : '') +
+                '<div style="margin-bottom:0.8rem"><label style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--text-mid);display:block;margin-bottom:4px">Reassign duty to (free faculty):</label>' +
+                '<select id="depAssign_' + r.id + '" style="padding:7px 10px;border:1.5px solid #e0e3f0;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:13px;background:#f8f9fe;min-width:260px">' +
+                '<option value="">-- Select replacement faculty --</option>' + freeOpts + '</select></div>' +
+                '<div class="rc-actions"><button class="btn-success" onclick="approveDeputation(' + r.id + ')">✅ Approve &amp; Reassign</button>' +
+                '<button class="btn-danger" onclick="rejectDeputation(' + r.id + ')">❌ Reject</button></div></div>';
+        }).join('');
+
+    const resolvedRows = resolved.map(r => {
+        const duty = DUTIES.find(d => d.id === r.dutyId);
+        return '<tr><td>' + r.requestorName + '</td><td>' + (duty?formatDate(duty.date):'—') + '</td>' +
+            '<td>' + r.purpose + '</td>' +
+            '<td>' + formatDate(r.startDate) + ' – ' + formatDate(r.endDate) + '</td>' +
+            '<td>' + formatDate(r.submittedOn) + '</td>' +
+            '<td><span class="badge ' + (r.status==='approved'?'badge-success':'badge-red') + '">' + r.status + '</span></td></tr>';
+    }).join('');
+
+    main.innerHTML =
+        '<div class="view-header"><h2>Deputation Requests</h2><p>' + pending.length + ' pending · ' + resolved.length + ' resolved</p></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>⏳ Pending Deputations</h3></div><div style="padding:1rem">' + pendingCards + '</div></div>' +
+        (resolved.length > 0
+            ? '<div class="section-card"><div class="section-card-header"><h3>✅ Resolved</h3></div>' +
+              '<div class="table-wrap"><table class="data-table"><thead><tr><th>Faculty</th><th>Duty Date</th><th>Purpose</th><th>Duration</th><th>Submitted</th><th>Status</th></tr></thead>' +
+              '<tbody>' + resolvedRows + '</tbody></table></div></div>'
+            : '');
+}
+window.approveDeputation = function(reqId) {
+    const req = DEPUTATION_REQUESTS.find(r => r.id === reqId);
+    if (!req) return;
+    const assignEmail = (document.getElementById('depAssign_' + reqId)||{}).value;
+    if (!assignEmail) return showNotif('Please select a replacement faculty','error');
+    const duty = DUTIES.find(d => d.id === req.dutyId);
+    if (duty) { duty.assignedTo = assignEmail; duty.dept = USERS[assignEmail]?.dept || duty.dept; }
+    req.status = 'approved'; req.resolvedBy = currentUser.email;
+    showNotif('Deputation approved. Duty reassigned to ' + getFacultyName(assignEmail));
+    renderAdminDeputations(document.getElementById('adminMain'));
+};
+window.rejectDeputation = function(reqId) {
+    const req = DEPUTATION_REQUESTS.find(r => r.id === reqId);
+    if (req) { req.status = 'rejected'; req.resolvedBy = currentUser.email; }
+    showNotif('Deputation request rejected.');
+    renderAdminDeputations(document.getElementById('adminMain'));
+};
+
+// ═══════════════════════════════════════════════
+//  REPORTS
+// ═══════════════════════════════════════════════
+function adminReportsHTML() {
+    const deptTiles = DEPARTMENTS.map(dept => {
+        const m    = DEPT_META[dept] || {};
+        const fac  = getDeptFacultyCount(dept);
+        const duty = getDeptDutyCount(dept);
+        const free = getDeptFreeFacultyCount(dept);
+        const ptr  = (RR_POINTER[dept] || 0) + 1;
+        const list = getDeptFacultyList(dept);
+        const topFaculty = Object.entries(USERS)
+            .filter(([, u]) => u.role === 'faculty' && u.dept === dept)
+            .map(([email, u]) => ({ name: u.name, count: DUTIES.filter(d => d.assignedTo === email).length }))
+            .sort((a, b) => b.count - a.count)[0];
+        return '<div class="dept-stat-tile">' +
+            '<h4>' + (m.icon||'') + ' ' + dept + '</h4>' +
+            '<div class="dept-count-faculty">' + fac + '</div>' +
+            '<div style="font-size:0.72rem;color:var(--text-light)">Faculty</div>' +
+            '<div style="margin-top:6px;font-size:0.75rem">📋 ' + duty + ' duties</div>' +
+            '<div style="font-size:0.7rem;color:#2e7d32">✓ ' + free + ' free</div>' +
+            '<div style="font-size:0.65rem;color:var(--red);font-family:\'DM Mono\',monospace">RR: #' + ptr + '/' + list.length + '</div>' +
+            (topFaculty && topFaculty.count > 0 ? '<div style="font-size:0.6rem;color:var(--text-light);margin-top:2px">Top: ' + topFaculty.name.split(' ').pop() + ' (' + topFaculty.count + ')</div>' : '') +
+            '</div>';
+    }).join('');
+
+    const allFacultyRows = Object.entries(USERS)
+        .filter(([, u]) => u.role === 'faculty')
+        .sort((a, b) => {
+            const ca = DUTIES.filter(d => d.assignedTo === a[0]).length;
+            const cb = DUTIES.filter(d => d.assignedTo === b[0]).length;
+            return cb - ca;
+        })
+        .map(([email, u]) => {
+            const count = DUTIES.filter(d => d.assignedTo === email).length;
+            const rrPos = getDeptFacultyList(u.dept).indexOf(email) + 1;
+            return '<tr><td>' + u.name + '</td><td><span class="badge badge-info">' + u.dept + '</span></td>' +
+                '<td>' + u.designation + '</td>' +
+                '<td><span class="badge ' + (count > 0 ? 'badge-warning' : 'badge-success') + '">' + count + '</span></td>' +
+                '<td style="font-family:\'DM Mono\',monospace;font-size:0.72rem;color:var(--red)">#' + rrPos + '</td></tr>';
+        }).join('');
+
+    return '<div class="view-header"><h2>Reports &amp; Analytics</h2></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>Department Summary</h3></div><div class="dept-stats-grid">' + deptTiles + '</div></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>Request Summary</h3></div>' +
+        '<div style="padding:1rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">' +
+        '<div class="dept-stat-tile"><h4>🔄 Swap</h4><div class="dept-count-faculty">' + SWAP_REQUESTS.length + '</div><div>Total</div><div style="margin-top:4px;font-size:0.72rem">' + SWAP_REQUESTS.filter(r=>r.status==='approved').length + ' approved</div></div>' +
+        '<div class="dept-stat-tile"><h4>✈️ Deputation</h4><div class="dept-count-faculty">' + DEPUTATION_REQUESTS.length + '</div><div>Total</div><div style="margin-top:4px;font-size:0.72rem">' + DEPUTATION_REQUESTS.filter(r=>r.status==='approved').length + ' approved</div></div>' +
+        '</div></div>' +
+        '<div class="section-card"><div class="section-card-header"><h3>Faculty Duty Distribution (sorted by count)</h3></div>' +
+        '<div class="table-wrap"><table class="data-table"><thead><tr><th>Name</th><th>Dept</th><th>Designation</th><th>Duties</th><th>RR Position</th></tr></thead>' +
+        '<tbody>' + (allFacultyRows || '<tr><td colspan="5"><div class="empty-state">No data.</div></td></tr>') + '</tbody></table></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+//  THRESHOLD
+// ═══════════════════════════════════════════════
+function adminThresholdHTML() {
+    return '<div class="view-header"><h2>Threshold Settings</h2></div>' +
+        '<div class="form-card">' +
+        '<div class="form-group"><label>Max IAT duties per faculty</label><input type="number" value="4" min="1" max="20"></div>' +
+        '<div class="form-group"><label>Max Model Exam duties per faculty</label><input type="number" value="3" min="1" max="20"></div>' +
+        '<div class="form-group"><label>Max End Semester duties per faculty</label><input type="number" value="5" min="1" max="20"></div>' +
+        '<button class="btn-primary" onclick="showNotif(\'Settings saved\')">Save Settings</button>' +
+        '</div>';
+}
+
+// ═══════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════
+function adminCalendarHTML() {
+    const now = new Date(), year = now.getFullYear(), month = now.getMonth();
+    const dim = new Date(year, month + 1, 0).getDate();
+    let html = '<div class="view-header"><h2>Calendar – ' + now.toLocaleString('default',{month:'long'}) + ' ' + year + '</h2></div>' +
+        '<div class="calendar-grid">' +
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => '<div class="cal-day-header">' + d + '</div>').join('');
+    const firstDay = new Date(year, month, 1).getDay();
+    for (let i = 0; i < firstDay; i++) html += '<div></div>';
+    for (let d = 1; d <= dim; d++) {
+        const ds = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const duties = DUTIES.filter(du => du.date === ds);
+        const hd = duties.length > 0;
+        html += '<div class="cal-day ' + (hd?'has-duty':'') + '">' + d +
+            (hd ? '<br><span style="font-size:8px">📋 ' + duties.length + '</span>' : '') + '</div>';
+    }
+    return html + '</div>';
+}
+
+// ═══════════════════════════════════════════════
+//  SCROLL PROGRESS
+// ═══════════════════════════════════════════════
+window.addEventListener('scroll', () => {
+    const ws = document.documentElement.scrollTop;
+    const h  = document.documentElement.scrollHeight - window.innerHeight;
+    if (h > 0) document.getElementById('scrollProgressBar').style.width = (ws / h) * 100 + '%';
+}, { passive: true });
+
+window.logout = logout;
+</script>
+</body>
+</html>
