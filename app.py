@@ -57,7 +57,8 @@ from pymongo import MongoClient
 # ─────────────────────────────────────────────
 #  APP
 # ─────────────────────────────────────────────
-STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'static'))
+# ✅ FIX: point static folder to the directory containing app.py (root of repo)
+STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='', static_folder=STATIC_DIR)
 app.config["JWT_SECRET_KEY"] = "examduty-secret-key-2025"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)
